@@ -136,7 +136,7 @@ def _resolve_driver_resources(
 def _resolve_executor_resources(
     executor: Executor | None = None,
     num_executors: int | None = None,
-    resources_per_executor: dict[str, str | int] | None = None,
+    resources_per_executor: dict | None = None,
 ) -> tuple[int, int, str]:
     """Resolve executor configuration.
 
@@ -483,7 +483,7 @@ def get_spark_connect_driver_spec(
 def get_spark_connect_executor_spec(
     executor: Executor | None = None,
     num_executors: int | None = None,
-    resources_per_executor: dict[str, str | int] | None = None,
+    resources_per_executor: dict | None = None,
 ) -> models.SparkV1alpha1ExecutorSpec:
     """Convert SDK Executor to API ExecutorSpec.
 
@@ -521,7 +521,7 @@ def build_spark_connect_cr(
     namespace: str,
     spark_version: str | None = None,
     num_executors: int | None = None,
-    resources_per_executor: dict[str, str | int] | None = None,
+    resources_per_executor: dict | None = None,
     spark_conf: dict[str, str] | None = None,
     driver: Driver | None = None,
     executor: Executor | None = None,
@@ -698,7 +698,7 @@ def get_spark_job_driver_spec(
 
 def get_spark_job_executor_spec(
     num_executors: int | None = None,
-    resources_per_executor: dict[str, str | int] | None = None,
+    resources_per_executor: dict | None = None,
 ) -> models.SparkV1beta2ExecutorSpec:
     """Build ExecutorSpec for SparkApplication.
 
@@ -812,7 +812,7 @@ def get_spark_application_cr_from_file_job(
     main_file: str,
     arguments: list[str] | None = None,
     num_executors: int | None = None,
-    resources_per_executor: dict[str, str | int] | None = None,
+    resources_per_executor: dict | None = None,
     options: list | None = None,
     backend: Any | None = None,
     spark_conf: dict[str, str] | None = None,
@@ -875,7 +875,7 @@ def get_spark_application_cr_from_func_job(
     func: Callable,
     func_args: dict[str, Any] | None = None,
     num_executors: int | None = None,
-    resources_per_executor: dict[str, str | int] | None = None,
+    resources_per_executor: dict | None = None,
     options: list | None = None,
     backend: Any | None = None,
     spark_conf: dict[str, str] | None = None,
