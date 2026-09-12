@@ -1,3 +1,11 @@
+# [0.5.1](https://github.com/kubeflow/sdk/releases/tag/0.5.1) (unreleased)
+
+## 🚀 Features
+
+- feat(spark): migrate `[spark]` extra to `pyspark-client` for remote-only execution ([#795](https://github.com/kubeflow/sdk/pull/795) by @Neha-Nimsatkar)
+  - Replaced `pyspark-connect` with `pyspark-client` to eliminate bundled Spark JARs, Py4J, and full local JVM dependencies.
+  - Spark sessions require remote connections via `sc://` endpoints; local execution via `spark.master` is unsupported.
+
 # [0.5.0](https://github.com/kubeflow/sdk/releases/tag/0.5.0) (2026-08-07)
 
 This is Kubeflow SDK 0.5.0 release.
