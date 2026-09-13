@@ -169,3 +169,10 @@ docs-serve:  ## Build and serve docs with live reload
 	@uv sync --group docs
 	@uv pip install sphinx-autobuild
 	@uv run sphinx-autobuild docs/source docs/_build/html
+
+.PHONY: test-e2e-notebook
+test-e2e-notebook: ## Run E2E test for a Jupyter notebook using Papermill
+	@NOTEBOOK_INPUT=$(NOTEBOOK_INPUT) \
+	 NOTEBOOK_OUTPUT=$(NOTEBOOK_OUTPUT) \
+	 PAPERMILL_TIMEOUT=$(PAPERMILL_TIMEOUT) \
+	 bash ./hack/e2e-run-notebook.sh

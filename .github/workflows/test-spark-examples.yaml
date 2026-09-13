@@ -37,10 +37,11 @@ jobs:
         uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true
-      - name: Install project and test deps
+      - name: Install project, test, and notebook deps
         run: |
-          uv sync --extra spark
+          uv sync --extra spark --group notebooks
           uv pip install pytest pytest-timeout
+          echo "$PWD/.venv/bin" >> "$GITHUB_PATH"
 
       - name: Install Kind, kubectl, and Helm
         run: |
@@ -84,6 +85,36 @@ jobs:
           SPARK_E2E_RUN_IN_CLUSTER: "1"
           SPARK_E2E_RUNNER_IMAGE: spark-e2e-runner:local
         timeout-minutes: 15
+
+      - name: Run E2E test for Spark example Notebooks
+        run: |
+          mkdir -p artifacts/notebooks
+          make test-e2e-notebook \
+            NOTEBOOK_INPUT=examples/spark/batch_job_lifecycle.ipynb \
+            NOTEBOOK_OUTPUT=artifacts/notebooks/batch_job_lifecycle.ipynb \
+            PAPERMILL_TIMEOUT=600
+          make test-e2e-notebook \
+            NOTEBOOK_INPUT=examples/spark/batch_func_job_lifecycle.ipynb \
+            NOTEBOOK_OUTPUT=artifacts/notebooks/batch_func_job_lifecycle.ipynb \
+            PAPERMILL_TIMEOUT=600
+          make test-e2e-notebook \
+            NOTEBOOK_INPUT=examples/spark/batch_job_options.ipynb \
+            NOTEBOOK_OUTPUT=artifacts/notebooks/batch_job_options.ipynb \
+            PAPERMILL_TIMEOUT=600
+          make test-e2e-notebook \
+            NOTEBOOK_INPUT=examples/spark/batch_failed_job.ipynb \
+            NOTEBOOK_OUTPUT=artifacts/notebooks/batch_failed_job.ipynb \
+            PAPERMILL_TIMEOUT=600
+        env:
+          SPARK_TEST_NAMESPACE: spark-test
+
+      - name: Upload Notebook Artifacts
+        uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: spark-notebooks-${{ matrix.kubernetes-version }}
+          path: ./artifacts/notebooks/*
+          retention-days: 7
 
       - name: Collect logs on failure
         if: failure()
