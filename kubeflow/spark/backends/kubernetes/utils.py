@@ -114,8 +114,8 @@ def _resolve_driver_resources(
         Tuple of (cores, memory).
 
     Raises:
-        ValueError: If the configured CPU or memory values are invalid.
-        TypeError: If an unsupported CPU type (such as bool) is passed.
+        ValueError:
+            If the configured CPU or memory values are invalid.
     """
 
     cores = constants.DEFAULT_DRIVER_CPU
@@ -154,8 +154,8 @@ def _resolve_executor_resources(
         Tuple containing ``(instances, cores, memory)``.
 
     Raises:
-        ValueError: If the configured CPU or memory values are invalid.
-        TypeError: If an unsupported CPU type (such as bool) is passed.
+        ValueError:
+            If the configured CPU or memory values are invalid.
     """
 
     if executor and executor.num_instances is not None:
@@ -257,14 +257,13 @@ def _validate_cpu_value(cpu: str | int | None) -> int:
         Integer CPU core value.
 
     Raises:
-        ValueError: If CPU value is invalid or non-positive.
-        TypeError: If an unsupported type (such as bool) is passed.
+        ValueError: If CPU value is invalid.
     """
     if cpu is None:
         raise ValueError("CPU value cannot be None")
 
     if isinstance(cpu, bool):
-        raise TypeError("Invalid CPU type 'bool'. Expected str or int.")
+        raise ValueError("Invalid CPU type 'bool'. Expected str or int.")
 
     if isinstance(cpu, int):
         cores = float(cpu)
@@ -500,8 +499,8 @@ def get_spark_connect_executor_spec(
         API ExecutorSpec model.
 
     Raises:
-        ValueError: If the configured executor resources are invalid.
-        TypeError: If an unsupported CPU type (such as bool) is passed.
+        ValueError:
+            If the configured executor resources are invalid.
     """
     instances, cores, memory = _resolve_executor_resources(
         executor,
@@ -552,8 +551,8 @@ def build_spark_connect_cr(
         SparkConnect CR as typed Pydantic model.
 
     Raises:
-        ValueError: If the provided driver or executor resource configuration is invalid.
-        TypeError: If an unsupported CPU type (such as bool) is passed.
+        ValueError:
+            If the provided driver or executor resource configuration is invalid.
     """
     _validate_spark_conf(spark_conf)
 

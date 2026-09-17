@@ -1901,10 +1901,4 @@ def test_get_spark_application_info_from_cr(
         assert job.creation_timestamp == creation_timestamp
         assert job.num_executors == 5
 
-
-def test_get_spark_connect_executor_spec_bool_cpu_raises_type_error():
-    """Verify that boolean CPU values raise TypeError via public construction path."""
-    with pytest.raises(TypeError):
-        get_spark_connect_executor_spec(resources_per_executor={"cpu": True})
-
     print("test execution complete")
