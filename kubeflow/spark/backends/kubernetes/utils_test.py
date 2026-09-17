@@ -972,7 +972,7 @@ def test_generate_job_name(test_case: TestCase) -> None:
                     {"cpu": 1},
                 ],
             },
-            expected_error=TypeError,
+            expected_error=ValueError,
         ),
     ],
 )
