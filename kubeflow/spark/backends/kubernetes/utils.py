@@ -288,7 +288,7 @@ def _validate_cpu_value(cpu: str | int | None) -> int:
                 raise ValueError(f"Invalid CPU value '{cpu}'.") from e
 
         else:
-           cores = float(cpu)
+            cores = float(cpu)
 
     else:
         raise ValueError(f"Invalid CPU type '{type(cpu)}'. Expected str or int.")

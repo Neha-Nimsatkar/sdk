@@ -39,7 +39,6 @@ from kubeflow.spark.backends.kubernetes.utils import (
     get_spark_application_cr_from_file_job,
     get_spark_application_cr_from_func_job,
     get_spark_application_info_from_cr,
-    get_spark_connect_executor_spec,
     get_spark_connect_info_from_cr,
     get_spark_job_driver_spec,
     get_spark_job_executor_spec,
