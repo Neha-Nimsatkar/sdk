@@ -74,11 +74,30 @@ jobs:
         run: |
           mkdir -p ./artifacts/notebooks
           chmod +x ./hack/e2e-run-notebook.sh
-          ./hack/e2e-run-notebook.sh
+
+          notebooks=(
+            "examples/spark/batch_job_lifecycle.ipynb"
+            "examples/spark/batch_func_job_lifecycle.ipynb"
+            "examples/spark/batch_job_options.ipynb"
+            "examples/spark/batch_failed_job.ipynb"
+            "examples/spark/connect_existing_session.ipynb"
+            "examples/spark/demo_existing_sparkconnect.ipynb"
+            "examples/spark/spark_advanced_options.ipynb"
+            "examples/spark/spark_connect_simple.ipynb"
+          )
+
+          for nb in "${notebooks[@]}"; do
+            nb_name=$(basename "$nb")
+            echo "Running notebook: $nb"
+            NOTEBOOK_INPUT="$nb" \
+            NOTEBOOK_OUTPUT="./artifacts/notebooks/${nb_name}" \
+            PAPERMILL_TIMEOUT=600 \
+            ./hack/e2e-run-notebook.sh
+          done
         env:
           SPARK_TEST_CLUSTER: spark-test
           SPARK_TEST_NAMESPACE: spark-test
-        timeout-minutes: 25
+        timeout-minutes: 40
 
       - name: Upload Notebook Artifacts
         if: always()
