@@ -98,19 +98,19 @@ Spark Examples
    * - Task
      - Example
      - Description
-     - Code
+     - Notebook
    * - Basic Spark Client
      - SparkClient API
      - Basic ``SparkClient`` usage with a simple API
-     - `View Example <https://github.com/kubeflow/sdk/blob/main/examples/spark/spark_connect_simple.py>`_
+     - `Open Notebook <https://github.com/kubeflow/sdk/blob/main/examples/spark/spark_connect_simple.ipynb>`_
    * - Advanced Spark Configuration
      - Driver / Executor Configuration
      - Configure Spark jobs using Driver and Executor objects
-     - `View Example <https://github.com/kubeflow/sdk/blob/main/examples/spark/spark_advanced_options.py>`_
+     - `Open Notebook <https://github.com/kubeflow/sdk/blob/main/examples/spark/spark_advanced_options.ipynb>`_
    * - Connect to Existing Spark Cluster
      - Existing Spark Connect Session
      - Connect to an already running Spark Connect cluster
-     - `View Example <https://github.com/kubeflow/sdk/blob/main/examples/spark/connect_existing_session.py>`_
+     - `Open Notebook <https://github.com/kubeflow/sdk/blob/main/examples/spark/connect_existing_session.ipynb>`_
    * - URL-based Connection
      - Spark Connect URL
      - Connect to Spark Connect using a connection URL

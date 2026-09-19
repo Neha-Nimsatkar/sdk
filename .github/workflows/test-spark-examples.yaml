@@ -40,7 +40,7 @@ jobs:
       - name: Install project, test, and notebook deps
         run: |
           uv sync --extra spark --group notebooks
-          uv pip install pytest pytest-timeout
+          uv pip install papermill ipykernel
           echo "$PWD/.venv/bin" >> "$GITHUB_PATH"
 
       - name: Install Kind, kubectl, and Helm
@@ -70,51 +70,24 @@ jobs:
           SPARK_OPERATOR_IMAGE_TAG: local
         timeout-minutes: 15
 
-      - name: Build and load Spark E2E runner image (in-cluster)
+      - name: Run E2E test for Spark example Notebooks
         run: |
-          docker build -f hack/Dockerfile.spark-e2e-runner -t spark-e2e-runner:local .
-          kind load docker-image spark-e2e-runner:local --name spark-test
-        timeout-minutes: 5
-
-      - name: Run example validation tests
-        run: uv run pytest test/e2e/spark/test_spark_examples.py -v --tb=short
+          mkdir -p ./artifacts/notebooks
+          chmod +x ./hack/e2e-run-notebook.sh
+          ./hack/e2e-run-notebook.sh
         env:
           SPARK_TEST_CLUSTER: spark-test
           SPARK_TEST_NAMESPACE: spark-test
-          SPARK_E2E_DEBUG: "1"
-          SPARK_E2E_RUN_IN_CLUSTER: "1"
-          SPARK_E2E_RUNNER_IMAGE: spark-e2e-runner:local
-        timeout-minutes: 15
-
-      - name: Run E2E test for Spark example Notebooks
-        run: |
-          mkdir -p artifacts/notebooks
-          make test-e2e-notebook \
-            NOTEBOOK_INPUT=examples/spark/batch_job_lifecycle.ipynb \
-            NOTEBOOK_OUTPUT=artifacts/notebooks/batch_job_lifecycle.ipynb \
-            PAPERMILL_TIMEOUT=600
-          make test-e2e-notebook \
-            NOTEBOOK_INPUT=examples/spark/batch_func_job_lifecycle.ipynb \
-            NOTEBOOK_OUTPUT=artifacts/notebooks/batch_func_job_lifecycle.ipynb \
-            PAPERMILL_TIMEOUT=600
-          make test-e2e-notebook \
-            NOTEBOOK_INPUT=examples/spark/batch_job_options.ipynb \
-            NOTEBOOK_OUTPUT=artifacts/notebooks/batch_job_options.ipynb \
-            PAPERMILL_TIMEOUT=600
-          make test-e2e-notebook \
-            NOTEBOOK_INPUT=examples/spark/batch_failed_job.ipynb \
-            NOTEBOOK_OUTPUT=artifacts/notebooks/batch_failed_job.ipynb \
-            PAPERMILL_TIMEOUT=600
-        env:
-          SPARK_TEST_NAMESPACE: spark-test
+        timeout-minutes: 25
 
       - name: Upload Notebook Artifacts
-        uses: actions/upload-artifact@v6
         if: always()
+        uses: actions/upload-artifact@v4
         with:
-          name: spark-notebooks-${{ matrix.kubernetes-version }}
+          name: executed-notebooks-${{ matrix.kubernetes-version }}
           path: ./artifacts/notebooks/*
-          retention-days: 7
+
+
 
       - name: Collect logs on failure
         if: failure()
