@@ -383,12 +383,8 @@ print_status() {
     kubectl get pods -n "$NAMESPACE" 2>/dev/null || echo "No pods yet"
     echo ""
     log_info "=== Usage ==="
-    if [[ "${E2E_CRD_ONLY:-0}" == "1" ]]; then
-        echo "Smoke test: uv run pytest test/e2e/spark/test_spark_examples.py -v -k smoke"
-    else
-        echo "To run E2E tests:"
-        echo "  python -m pytest test/e2e/spark/test_spark_examples.py -v"
-    fi
+    echo "To run E2E notebook tests:"
+    echo "  ./hack/e2e-run-notebook.sh"
     echo ""
     echo "To delete cluster:"
     echo "  make test-e2e-setup-cluster K8S_VERSION=$K8S_VERSION --delete"

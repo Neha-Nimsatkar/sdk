@@ -37,10 +37,11 @@ jobs:
         uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true
-      - name: Install project and test deps
+      - name: Install project, test, and notebook deps
         run: |
-          uv sync --extra spark
-          uv pip install pytest pytest-timeout
+          uv sync --extra spark --group notebooks
+          uv pip install papermill ipykernel
+          echo "$PWD/.venv/bin" >> "$GITHUB_PATH"
 
       - name: Install Kind, kubectl, and Helm
         run: |
@@ -69,21 +70,43 @@ jobs:
           SPARK_OPERATOR_IMAGE_TAG: local
         timeout-minutes: 15
 
-      - name: Build and load Spark E2E runner image (in-cluster)
+      - name: Run E2E test for Spark example Notebooks
         run: |
-          docker build -f hack/Dockerfile.spark-e2e-runner -t spark-e2e-runner:local .
-          kind load docker-image spark-e2e-runner:local --name spark-test
-        timeout-minutes: 5
+          mkdir -p ./artifacts/notebooks
+          chmod +x ./hack/e2e-run-notebook.sh
 
-      - name: Run example validation tests
-        run: uv run pytest test/e2e/spark/test_spark_examples.py -v --tb=short
+          notebooks=(
+            "examples/spark/batch_job_lifecycle.ipynb"
+            "examples/spark/batch_func_job_lifecycle.ipynb"
+            "examples/spark/batch_job_options.ipynb"
+            "examples/spark/batch_failed_job.ipynb"
+            "examples/spark/connect_existing_session.ipynb"
+            "examples/spark/demo_existing_sparkconnect.ipynb"
+            "examples/spark/spark_advanced_options.ipynb"
+            "examples/spark/spark_connect_simple.ipynb"
+          )
+
+          for nb in "${notebooks[@]}"; do
+            nb_name=$(basename "$nb")
+            echo "Running notebook: $nb"
+            NOTEBOOK_INPUT="$nb" \
+            NOTEBOOK_OUTPUT="./artifacts/notebooks/${nb_name}" \
+            PAPERMILL_TIMEOUT=600 \
+            ./hack/e2e-run-notebook.sh
+          done
         env:
           SPARK_TEST_CLUSTER: spark-test
           SPARK_TEST_NAMESPACE: spark-test
-          SPARK_E2E_DEBUG: "1"
-          SPARK_E2E_RUN_IN_CLUSTER: "1"
-          SPARK_E2E_RUNNER_IMAGE: spark-e2e-runner:local
-        timeout-minutes: 15
+        timeout-minutes: 40
+
+      - name: Upload Notebook Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: executed-notebooks-${{ matrix.kubernetes-version }}
+          path: ./artifacts/notebooks/*
+
+
 
       - name: Collect logs on failure
         if: failure()
