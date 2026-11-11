@@ -31,7 +31,7 @@ concurrency:
 jobs:
   spark-e2e-test:
     name: Spark E2E Test
-    runs-on: cncf-ubuntu-16-64-x86
+    runs-on: ubuntu-latest
 
     defaults:
       run:
