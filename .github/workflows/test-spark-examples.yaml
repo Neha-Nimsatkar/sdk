@@ -15,6 +15,9 @@
 name: Spark Examples E2E Test
 
 on:
+  push:
+    branches:
+      - test-ci-fork
   pull_request:
   workflow_dispatch:
 
