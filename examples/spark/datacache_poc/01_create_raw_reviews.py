@@ -1,5 +1,7 @@
 """Create noisy raw product reviews and write them to SeaweedFS as JSON."""
+
 import random
+
 from spark_seaweed import get_spark
 
 random.seed(7)
@@ -13,16 +15,20 @@ phrases = {
 rows = []
 for i in range(400):
     rating = random.choice([1, 2, 3, 4, 5])
-    text = random.choice(phrases[rating]) + " " + random.choice(["Fast shipping.", "Packaging was fine.", "Arrived on time.", ""])
+    text = (
+        random.choice(phrases[rating])
+        + " "
+        + random.choice(["Fast shipping.", "Packaging was fine.", "Arrived on time.", ""])
+    )
     r = random.random()
     if r < 0.08:
-        text = f"<p>{text}</p><br/>"            # HTML noise
+        text = f"<p>{text}</p><br/>"  # HTML noise
     elif r < 0.12:
-        text = None                              # missing text
+        text = None  # missing text
     elif r < 0.16:
         text = "BUY NOW cheap deals http://spam.example.com"  # spam
     elif r < 0.19:
-        text = "ok"                              # too short
+        text = "ok"  # too short
     rows.append((f"r{i}", rating, text))
 rows += [(f"d{i}", x[1], x[2]) for i, x in enumerate(rows[:10])]  # duplicates
 

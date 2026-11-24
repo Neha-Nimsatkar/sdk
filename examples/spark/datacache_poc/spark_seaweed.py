@@ -1,4 +1,4 @@
-from kubeflow.spark import SparkClient, Driver, Executor
+from kubeflow.spark import Driver, Executor, SparkClient
 
 IMAGE = "spark-s3-iceberg:4.0.4"
 
@@ -14,6 +14,7 @@ CONF = {
     "spark.hadoop.fs.s3a.connection.ssl.enabled": "false",
     "spark.hadoop.fs.s3a.endpoint.region": "us-east-1",
 }
+
 
 def get_spark():
     client = SparkClient()
