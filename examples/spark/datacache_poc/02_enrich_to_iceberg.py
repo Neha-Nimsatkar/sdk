@@ -17,6 +17,8 @@
 Output schema (what the TrainJob expects): content (string), label (int64, 0-4).
 """
 
+import time
+
 from pyspark.sql import functions as fn
 from spark_seaweed import get_spark
 
@@ -40,7 +42,9 @@ try:
     )
     print("raw rows:", raw.count(), " enriched rows:", clean.count())
     clean.groupBy("label").count().orderBy("label").show()
+    start = time.perf_counter()
     clean.writeTo("lake.default.reviews_enriched").createOrReplace()
+    print(f"iceberg write: {time.perf_counter() - start:.1f}s")
     spark.sql("SELECT file FROM lake.default.reviews_enriched.metadata_log_entries").show(
         truncate=False
     )

@@ -14,14 +14,20 @@
 
 """Enrich raw reviews with Spark and push them into the data cache head."""
 
+import time
+
+from data_cache_push import push_to_data_cache, to_arrow
 import pyarrow as pa
-import pyarrow.flight as flight
 from pyspark.sql import functions as fn
 from spark_seaweed import get_spark
 
+from kubeflow.spark import SparkClient
+
 HEAD_URL = "grpc://localhost:50051"  # kubectl port-forward to the cache head
 
+existing_sessions = {s.name for s in SparkClient().list_sessions()}
 client, spark = get_spark()
+new_sessions = [s.name for s in client.list_sessions() if s.name not in existing_sessions]
 try:
     raw = spark.read.json("s3a://mlpipeline/raw_reviews/")
     clean = (
@@ -39,20 +45,18 @@ try:
         .select("content", "label")
         .orderBy(fn.rand(7))  # shuffle: each worker's range gets a mix of labels
     )
-    try:
-        table = clean.toArrow()
-    except AttributeError:
-        table = pa.Table.from_pandas(clean.toPandas(), preserve_index=False)
-    table = table.cast(pa.schema([("content", pa.string()), ("label", pa.int64())]))
+    # Collect to Arrow before the session is closed (the DataFrame is lazy).
+    start = time.perf_counter()
+    table = to_arrow(clean).cast(pa.schema([("content", pa.string()), ("label", pa.int64())]))
+    collect_s = time.perf_counter() - start
 finally:
     spark.stop()
-    for s in client.list_sessions():
-        client.delete_session(s.name)
+    for name in new_sessions:
+        client.delete_session(name)
 
 print("enriched rows:", table.num_rows)
 
-flight_client = flight.connect(HEAD_URL)
-writer, _ = flight_client.do_put(flight.FlightDescriptor.for_path("push"), table.schema)
-writer.write_table(table, max_chunksize=500)
-writer.close()
-print("pushed", table.num_rows, "rows to the cache")
+start = time.perf_counter()
+pushed = push_to_data_cache(table, HEAD_URL)
+print(f"collect: {collect_s:.1f}s, push: {time.perf_counter() - start:.1f}s")
+print("pushed", pushed, "rows to the cache")

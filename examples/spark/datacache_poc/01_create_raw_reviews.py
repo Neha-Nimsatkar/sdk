@@ -14,6 +14,7 @@
 
 """Create noisy raw product reviews and write them to SeaweedFS as JSON."""
 
+import os
 import random
 
 from spark_seaweed import get_spark
@@ -27,13 +28,15 @@ phrases = {
     5: ["Excellent! Exceeds expectations.", "Love it, works perfectly."],
 }
 rows = []
-for i in range(400):
+NUM_REVIEWS = int(os.environ.get("NUM_REVIEWS", "400"))
+for i in range(NUM_REVIEWS):
     rating = random.choice([1, 2, 3, 4, 5])
     text = (
         random.choice(phrases[rating])
         + " "
         + random.choice(["Fast shipping.", "Packaging was fine.", "Arrived on time.", ""])
     )
+    text = f"{text.strip()} #{i}"  # unique text, so deduplication keeps real reviews
     r = random.random()
     if r < 0.08:
         text = f"<p>{text}</p><br/>"  # HTML noise
