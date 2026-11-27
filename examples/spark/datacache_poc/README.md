@@ -86,6 +86,23 @@ flow with the scripts.
    It polls the head and starts once it sees more rows than the placeholder table
    (see `train_func` in the notebook).
 
+## Timing
+
+One run on a local single-node Kind cluster: 50,010 raw reviews, 44,427 enriched rows,
+Spark session already warm. The numbers are indicative, not a benchmark.
+
+| Path | Steps | Time |
+|---|---|---|
+| Baseline (pull) | Iceberg write, then cache load | 4.3 s + about 0.4 s |
+| Write path (push) | Collect to Arrow, then push to the head | 2.7 s + 0.1 s |
+
+- The cache load time is the difference in cache readiness between this table and a
+  one-row table (26.8 s vs 26.4 s). That is within the noise of pod startup.
+- The push is faster mainly because it does not write the table to object storage.
+- A cold Spark session makes the first collect much slower (9.8 s). Both paths were
+  timed after a warm-up query.
+- Create the larger data set with `NUM_REVIEWS=50000 python 01_create_raw_reviews.py`.
+
 ## Known limits
 
 - The head holds all pushed rows in memory while it splits them.
