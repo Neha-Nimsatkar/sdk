@@ -19,8 +19,8 @@ CONF = {
 def get_spark():
     client = SparkClient()
     spark = client.connect(
-        driver=Driver(image=IMAGE, resources={"cpu": "1", "memory": "1Gi"}),
-        executor=Executor(num_instances=1, resources_per_executor={"cpu": "1", "memory": "1Gi"}),
+        driver=Driver(image=IMAGE, resources={"cpu": "1", "memory": "512Mi"}),
+        executor=Executor(num_instances=1, resources_per_executor={"cpu": "1", "memory": "512Mi"}),
         spark_conf=CONF,
         timeout=300,
     )
