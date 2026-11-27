@@ -30,6 +30,7 @@ raw reviews (S3) -> SparkClient enrichment -> push to cache head
 | `03_push_to_cache.py` | Write path: enriches the reviews and pushes them to the cache head |
 | `spark_seaweed.py` | Shared Spark session settings for SeaweedFS and Iceberg |
 | `spark_to_trainer_data_cache.ipynb` | Baseline flow in one notebook |
+| `spark_push_to_data_cache.ipynb` | Write path in one notebook: creates its own data, pushes it to the cache, trains, and cleans up |
 | `image/Dockerfile` | Spark image with the S3A and Iceberg jars |
 
 The enrichment strips HTML, drops missing, short and spam rows, removes duplicates,
@@ -54,7 +55,7 @@ are `content` (string) and `label` (int64).
   kind load docker-image spark-s3-iceberg:4.0.4 --name kubeflow-local
   ```
 
-- Run the scripts from this folder, with an environment that has the Kubeflow SDK.
+- Run the scripts and notebooks from this folder, with an environment that has the Kubeflow SDK.
 
 ## Baseline
 
@@ -71,6 +72,10 @@ This needs a data cache image built from the Trainer branch that adds the write 
 (`feat/data-cache-write-path`), set as `CACHE_IMAGE` in the runtime, with
 `S3_PATH_STYLE_ACCESS=true` for SeaweedFS.
 
+The quickest way is `spark_push_to_data_cache.ipynb`, which runs the whole flow and
+cleans up its Spark session and TrainJob at the end. The steps below are the same
+flow with the scripts.
+
 1. Run `01_create_raw_reviews.py` once.
 2. Start a TrainJob with `DataCacheInitializer`. The cache still starts from a small
    Iceberg table, and the push replaces its data.
@@ -78,6 +83,8 @@ This needs a data cache image built from the Trainer branch that adds the write 
    `kubectl port-forward pod/<train-job>-cache-0 50051:50051`.
 4. `python 03_push_to_cache.py` enriches the data and pushes it to the head.
 5. The training function waits until the head has data, then trains on the pushed rows.
+   It polls the head and starts once it sees more rows than the placeholder table
+   (see `train_func` in the notebook).
 
 ## Known limits
 
