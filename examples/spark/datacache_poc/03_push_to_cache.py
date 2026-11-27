@@ -1,8 +1,22 @@
+# Copyright The Kubeflow Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 """Enrich raw reviews with Spark and push them into the data cache head."""
+
 import pyarrow as pa
 import pyarrow.flight as flight
 from pyspark.sql import functions as fn
-
 from spark_seaweed import get_spark
 
 HEAD_URL = "grpc://localhost:50051"  # kubectl port-forward to the cache head
@@ -13,7 +27,9 @@ try:
     clean = (
         raw.withColumn(
             "content",
-            fn.trim(fn.regexp_replace(fn.regexp_replace("review_text", "<[^>]+>", " "), r"\s+", " ")),
+            fn.trim(
+                fn.regexp_replace(fn.regexp_replace("review_text", "<[^>]+>", " "), r"\s+", " ")
+            ),
         )
         .filter(fn.col("content").isNotNull() & (fn.length("content") >= 10))
         .filter(~fn.lower("content").rlike("http|buy now"))
